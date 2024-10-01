@@ -1,0 +1,26 @@
+[package]
+name = "opentelemetry-log"
+version = "0.1.0"
+edition = "2021"
+authors = ["Vincent <vincenzopalazzo@member.fsf.org>"]
+description = "A common library for OpenTelemetry logging in Rust."
+license = "GPL-2.0"
+repository = "https://github.com/vincent/opentelemetry-log"
+documentation = "https://docs.rs/opentelemetry-common"
+homepage = "https://github.com/vincent/opentelemetry-log"
+keywords = ["opentelemetry", "logging", "log", "rust"]
+categories = ["development-tools"]
+
+[dependencies]
+opentelemetry = { version = "0.25", features = ["logs"] }
+opentelemetry-appender-log = { version = "0.25", default-features = false }
+opentelemetry_sdk = { version = "0.25", features = [ "logs", "rt-tokio" ] }
+opentelemetry-otlp = { version = "0.25", features = [ "http-proto", "reqwest-client", "reqwest-rustls", "logs" ] }
+opentelemetry-semantic-conventions = { version = "0.25.0"  }
+anyhow = "^1"
+log = { version = "0.4", features = ["std"] }
+
+[dev-dependencies]
+clap = { version = "4.0.26", features = ["derive"] }
+tokio = { version = "^1.29.1", features = ["rt-multi-thread", "parking_lot"] }
+env_logger = "0.11.3"
