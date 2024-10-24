@@ -92,6 +92,6 @@ impl Drop for Opentelemetry {
         let Some(Err(err)) = self.logger.as_ref().map(|log| log.shutdown()) else {
             return;
         };
-        panic!("Failed to shutdown logger: {:?}", err);
+        eprintln!("Failed to shutdown logger: {:?}", err);
     }
 }
