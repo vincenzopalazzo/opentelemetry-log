@@ -8,12 +8,14 @@
 //! - `http_exporter`: Creates a new HTTP exporter builder for OpenTelemetry.
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use opentelemetry::KeyValue;
 use opentelemetry_appender_log::OpenTelemetryLogBridge;
 use opentelemetry_otlp::HttpExporterBuilder;
 use opentelemetry_otlp::Protocol;
 use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::logs::BatchConfigBuilder;
 use opentelemetry_sdk::Resource;
 
 use crate::Opentelemetry;
@@ -25,12 +27,20 @@ pub fn init(
     level: &str,
     exporter_endpoint: &str,
 ) -> anyhow::Result<()> {
+    // FIXME: make this configurable from the API level
+    let batch_config = BatchConfigBuilder::default()
+        .with_max_export_timeout(Duration::from_secs(1))
+        .with_max_queue_size(10_000)
+        .with_max_export_batch_size(100_000);
+    let batch_config = batch_config.build();
+
     let logger_provider = opentelemetry_otlp::new_pipeline()
         .logging()
         .with_resource(Resource::new(vec![KeyValue::new(
             opentelemetry_semantic_conventions::resource::SERVICE_NAME,
             tag,
         )]))
+        .with_batch_config(batch_config)
         .with_exporter(
             http_exporter()
                 .with_protocol(Protocol::HttpBinary) //can be changed to `Protocol::HttpJson` to export in JSON format
