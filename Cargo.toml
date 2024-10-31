@@ -5,9 +5,9 @@ edition = "2021"
 authors = ["Vincent <vincenzopalazzo@member.fsf.org>"]
 description = "A common library for OpenTelemetry logging in Rust."
 license = "GPL-2.0"
-repository = "https://github.com/vincent/opentelemetry-log"
+repository = "https://github.com/vincenzopalazzo/opentelemetry-log"
 documentation = "https://docs.rs/opentelemetry-common"
-homepage = "https://github.com/vincent/opentelemetry-log"
+homepage = "https://github.com/vincenzopalazzo/opentelemetry-log"
 keywords = ["opentelemetry", "logging", "log", "rust"]
 categories = ["development-tools"]
 
