@@ -29,7 +29,7 @@ pub fn init(
 ) -> anyhow::Result<()> {
     // FIXME: make this configurable from the API level
     let batch_config = BatchConfigBuilder::default()
-        .with_max_export_timeout(Duration::from_secs(1))
+        .with_max_export_timeout(Duration::from_secs(20))
         .with_max_queue_size(10_000)
         .with_max_export_batch_size(100_000);
     let batch_config = batch_config.build();
