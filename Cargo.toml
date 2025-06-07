@@ -12,7 +12,7 @@ keywords = ["opentelemetry", "logging", "log", "rust"]
 categories = ["development-tools"]
 
 [dependencies]
-opentelemetry = { version = "0.25", features = ["logs"] }
+opentelemetry = { version = "0.30", features = ["logs"] }
 opentelemetry-appender-log = { version = "0.25", default-features = false }
 opentelemetry_sdk = { version = "0.25", features = [ "logs", "rt-tokio" ] }
 opentelemetry-otlp = { version = "0.25", features = [ "http-proto", "reqwest-client", "reqwest-rustls", "logs" ] }
