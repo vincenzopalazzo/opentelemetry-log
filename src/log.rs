@@ -6,17 +6,13 @@
 //! - `init`: Initializes a new logger exported with OpenTelemetry. It sets up the logger provider,
 //!   configures the log appender, and sets the global logger.
 //! - `http_exporter`: Creates a new HTTP exporter builder for OpenTelemetry.
-use std::str::FromStr;
-use std::sync::Arc;
-use std::time::Duration;
-
 use opentelemetry::KeyValue;
 use opentelemetry_appender_log::OpenTelemetryLogBridge;
-use opentelemetry_otlp::HttpExporterBuilder;
-use opentelemetry_otlp::Protocol;
-use opentelemetry_otlp::WithExportConfig;
-use opentelemetry_sdk::logs::BatchConfigBuilder;
+use opentelemetry_otlp::{LogExporter, Protocol, WithExportConfig};
+use opentelemetry_sdk::logs::{BatchLogProcessor, LoggerProviderBuilder};
 use opentelemetry_sdk::Resource;
+use std::str::FromStr;
+use std::sync::Arc;
 
 use crate::Opentelemetry;
 
@@ -27,26 +23,29 @@ pub fn init(
     level: &str,
     exporter_endpoint: &str,
 ) -> anyhow::Result<()> {
-    // FIXME: make this configurable from the API level
-    let batch_config = BatchConfigBuilder::default()
-        .with_max_export_timeout(Duration::from_secs(20))
-        .with_max_queue_size(10_000)
-        .with_max_export_batch_size(100_000);
-    let batch_config = batch_config.build();
+    // Create the OTLP exporter using the new reqwest client by default
+    let exporter = LogExporter::builder()
+        .with_http()
+        .with_protocol(Protocol::HttpBinary)
+        .with_endpoint(format!("{exporter_endpoint}/v1/logs"))
+        .build()?;
 
-    let logger_provider = opentelemetry_otlp::new_pipeline()
-        .logging()
-        .with_resource(Resource::new(vec![KeyValue::new(
-            opentelemetry_semantic_conventions::resource::SERVICE_NAME,
-            tag,
-        )]))
-        .with_batch_config(batch_config)
-        .with_exporter(
-            http_exporter()
-                .with_protocol(Protocol::HttpBinary) //can be changed to `Protocol::HttpJson` to export in JSON format
-                .with_endpoint(format!("{exporter_endpoint}/v1/logs")),
+    // Create the batch processor
+    let processor = BatchLogProcessor::builder(exporter).build();
+
+    // Create the logger provider
+    let logger_provider = LoggerProviderBuilder::default()
+        .with_resource(
+            Resource::builder()
+                .with_attributes(vec![KeyValue::new(
+                    opentelemetry_semantic_conventions::resource::SERVICE_NAME,
+                    tag,
+                )])
+                .build(),
         )
-        .install_batch(opentelemetry_sdk::runtime::Tokio)?;
+        .with_log_processor(processor)
+        .build();
+
     manager.logger = Some(Arc::new(logger_provider.clone()));
 
     // Setup Log Appender for the log crate.
@@ -57,8 +56,4 @@ pub fn init(
     let level = log::Level::from_str(level)?;
     log::set_max_level(level.to_level_filter());
     Ok(())
-}
-
-fn http_exporter() -> HttpExporterBuilder {
-    opentelemetry_otlp::new_exporter().http()
 }

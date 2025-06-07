@@ -60,7 +60,7 @@ use opentelemetry_sdk::logs as sdklogs;
 /// An example can be found in the `examples` directory.
 #[derive(Debug, Clone)]
 pub struct Opentelemetry {
-    pub(crate) logger: Option<Arc<sdklogs::LoggerProvider>>,
+    pub(crate) logger: Option<Arc<sdklogs::SdkLoggerProvider>>,
 }
 
 impl Default for Opentelemetry {
