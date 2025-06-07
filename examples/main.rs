@@ -29,5 +29,15 @@ async fn main() -> anyhow::Result<()> {
         "debug" => log::debug!("{}", args.message),
         _ => anyhow::bail!("level `{}` not found", args.level),
     }
+    drop(manager);
+
+    let mut manager = Opentelemetry::new();
+    manager.init_log("foo", &args.level, &url)?;
+
+    match args.level.as_str() {
+        "info" => log::info!("{}", args.message),
+        "debug" => log::debug!("{}", args.message),
+        _ => anyhow::bail!("level `{}` not found", args.level),
+    }
     Ok(())
 }
